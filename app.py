@@ -46,20 +46,80 @@ All values in ₹ Crore (INR Cr).
     st.dataframe(projects)
 
 # ---------------- PAGE 2 ----------------
+# ---------------- PAGE 2 ----------------
 if page == " AI Forecasting":
-    st.header("AI Forecasting")
+    st.markdown("## 🤖 AI Forecasting")
+    st.markdown(
+        """
+        This section uses machine learning models to forecast key financial variables 
+        based on historical company data and economic indicators.
+        """
+    )
 
-    target = st.selectbox("Forecast Variable", ["Revenue", "Operating_Cost"])
+    st.markdown("---")
+
+    # Select variable
+    target = st.selectbox(
+        "📌 Forecast Variable",
+        ["Revenue", "Operating_Cost"]
+    )
+
     best_name, _, results = train_and_select_model(historical, target)
 
+    # Model comparison table
     df_results = pd.DataFrame({
         "Model": results.keys(),
-        "R2": [results[m]["R2"] for m in results],
-        "MAE": [results[m]["MAE"] for m in results]
+        "R² Score": [round(results[m]["R2"], 3) for m in results],
+        "Mean Absolute Error (₹ Cr)": [round(results[m]["MAE"], 2) for m in results]
     })
 
+    st.subheader(" Model Performance Comparison")
     st.dataframe(df_results)
-    st.success(f"Selected Model: {best_name}")
+
+    st.markdown("---")
+
+    # Explain metrics
+    st.subheader(" How to read these results")
+    st.markdown(
+        """
+        - **R² Score** shows how well the model explains past trends.  
+          A value closer to **1** means the model fits historical data very well.  
+        - **Mean Absolute Error (MAE)** shows the average prediction error in ₹ Crore.  
+          Lower MAE means more accurate predictions.
+        """
+    )
+
+    # Selected model explanation
+    st.markdown("---")
+    st.subheader(" Model Selection Decision")
+
+    if best_name == "Linear Regression":
+        explanation = (
+            "Linear Regression was selected because it explains historical trends "
+            "very accurately and produces the lowest prediction error. "
+            "It also provides stable and interpretable forecasts, making it suitable "
+            "for financial decision-making."
+        )
+    else:
+        explanation = (
+            "The selected model performed better than alternatives based on accuracy "
+            "and prediction stability."
+        )
+
+    st.success(f"**Selected Model:** {best_name}")
+    st.info(explanation)
+
+    # Business takeaway
+    st.markdown("---")
+    st.subheader("📌 Business Takeaway")
+    st.markdown(
+        """
+        The selected AI model provides a reliable estimate of future financial values. 
+        These forecasts are later used to evaluate project profitability, assess risk, 
+        and support capital allocation decisions.
+        """
+    )
+
 
 # ---------------- PAGE 3 ----------------
 if page == " Capital Allocation":
