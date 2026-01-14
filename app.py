@@ -6,7 +6,7 @@ from data_generation import *
 from forecasting import *
 from financial_metrics import *
 from allocation_model import *
-from chatbot_logic import get_chatbot_response
+from chatbot_logic import get_predefined_answers
 
 st.set_page_config(layout="wide")
 
