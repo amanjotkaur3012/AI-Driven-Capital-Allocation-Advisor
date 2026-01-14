@@ -14,10 +14,10 @@ st.set_page_config(layout="wide")
 # ---------------- SIDEBAR ----------------
 page = st.sidebar.radio(
     "Navigate",
-    ["1️⃣ Company Overview",
-     "2️⃣ AI Forecasting",
-     "3️⃣ Capital Allocation",
-     "4️⃣ Explainer Chatbot"]
+    [" Company Overview",
+     " AI Forecasting",
+     " Capital Allocation",
+     " Explainer Chatbot"]
 )
 
 scenario = st.sidebar.selectbox("Scenario", ["Base", "Best", "Worst"])
@@ -28,7 +28,7 @@ historical = generate_historical_data()
 projects = generate_project_data()
 
 # ---------------- PAGE 1 ----------------
-if page == "1️⃣ Company Overview":
+if page == " Company Overview":
     st.title("AI-Driven Capital Allocation Advisor")
 
     st.markdown("""
@@ -46,7 +46,7 @@ All values in ₹ Crore (INR Cr).
     st.dataframe(projects)
 
 # ---------------- PAGE 2 ----------------
-if page == "2️⃣ AI Forecasting":
+if page == " AI Forecasting":
     st.header("AI Forecasting")
 
     target = st.selectbox("Forecast Variable", ["Revenue", "Operating_Cost"])
@@ -62,7 +62,7 @@ if page == "2️⃣ AI Forecasting":
     st.success(f"Selected Model: {best_name}")
 
 # ---------------- PAGE 3 ----------------
-if page == "3️⃣ Capital Allocation":
+if page == " Capital Allocation":
     st.header(f"Capital Allocation – {scenario} Scenario")
 
     _, rev_model, _ = train_and_select_model(historical, "Revenue")
@@ -94,7 +94,7 @@ if page == "3️⃣ Capital Allocation":
     df = score_projects(df)
     df, spent = allocate(df)
 
-    # ✅ STORE RESULT
+    # STORE RESULT
     st.session_state["allocation_df"] = df
 
     st.dataframe(df)
@@ -108,7 +108,7 @@ if page == "3️⃣ Capital Allocation":
     st.pyplot(fig)
 
 # ---------------- PAGE 4 ----------------
-if page == "4️⃣ Explainer Chatbot":
+if page == " Explainer Chatbot":
     st.markdown("##  Capital Allocation Explainer")
     st.markdown(
         """
