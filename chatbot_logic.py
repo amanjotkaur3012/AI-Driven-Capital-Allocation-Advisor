@@ -6,7 +6,7 @@ def get_predefined_answers(df):
     highest_npv = df.sort_values("NPV", ascending=False).iloc[0]
 
     return {
-        "1️⃣ Which projects were selected for funding?":
+        " Which projects were selected for funding?":
             (
                 "These projects were selected because they offer a strong balance of "
                 "expected returns, manageable risk, and efficient use of capital. "
@@ -15,7 +15,7 @@ def get_predefined_answers(df):
                 + (", ".join(selected) if selected else "No projects were selected.")
             ),
 
-        "2️⃣ Which projects were rejected due to budget constraints?":
+        " Which projects were rejected due to budget constraints?":
             (
                 "These projects were not funded because, when compared with other options, "
                 "they delivered lower value for the level of risk involved. With limited "
@@ -24,21 +24,21 @@ def get_predefined_answers(df):
                 + (", ".join(rejected) if rejected else "No projects were rejected.")
             ),
 
-        "3️⃣ Which project carries the highest risk?":
+        " Which project carries the highest risk?":
             (
                 f"{highest_risk['Project_ID']} carries the highest risk because its expected "
                 "cash flows are more uncertain and show higher volatility compared to other "
                 "projects."
             ),
 
-        "4️⃣ Which project creates the highest value (NPV)?":
+        " Which project creates the highest value (NPV)?":
             (
                 f"{highest_npv['Project_ID']} creates the highest value as it is expected to "
                 "generate the greatest net benefit over its lifetime, even after accounting "
                 "for the cost of capital."
             ),
 
-        "5️⃣ What is the overall capital allocation recommendation?":
+        " What is the overall capital allocation recommendation?":
             (
                 "The overall recommendation is to invest in projects that deliver higher "
                 "returns with lower risk while staying within the available capital limit. "
