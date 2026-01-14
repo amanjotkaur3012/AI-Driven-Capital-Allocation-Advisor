@@ -180,20 +180,19 @@ if page == " AI Forecasting":
     )
 
 
-# ---------------- PAGE 3 ----------------
 # ---------------- PAGE 3: CAPITAL ALLOCATION ----------------
-if page == " Capital Allocation":
+if page == "3️⃣ Capital Allocation":
 
     st.header(f"Capital Allocation – {scenario} Scenario")
 
     st.markdown(
         """
-        This section evaluates investment projects under different economic scenarios
-        and allocates capital based on risk, return, and budget constraints.
+        This section evaluates competing investment projects under different economic
+        scenarios and allocates capital based on expected returns, risk, and budget constraints.
         """
     )
 
-    # --------- AI FORECASTING INPUTS ----------
+    # --------- FORECAST INPUTS ----------
     _, rev_model, _ = train_and_select_model(historical, "Revenue")
     _, cost_model, _ = train_and_select_model(historical, "Operating_Cost")
 
@@ -203,7 +202,6 @@ if page == " Capital Allocation":
 
     # --------- PROJECT EVALUATION ----------
     records = []
-
     for _, p in projects.iterrows():
         cf = cashflows(
             forecast_revenue,
@@ -243,73 +241,103 @@ if page == " Capital Allocation":
     if scenario == "Best":
         st.info(
             "This is the **Best Case scenario**, assuming favourable market conditions and strong growth. "
-            "In this case, the system prioritises projects with higher return potential, even if they "
-            "carry slightly higher risk, as upside opportunities outweigh downside concerns."
+            "The allocation strategy focuses on maximising value creation, even if it involves taking "
+            "slightly higher risk."
         )
-
     elif scenario == "Base":
         st.info(
             "This is the **Base Case scenario**, representing normal business conditions. "
             "Projects are selected based on a balanced trade-off between risk and return, "
-            "focusing on stable performance and efficient use of capital."
+            "with emphasis on stability and efficient capital use."
         )
-
-    else:  # Worst
+    else:
         st.info(
-            "This is the **Worst Case scenario**, reflecting adverse economic conditions and higher uncertainty. "
-            "The allocation strategy becomes conservative, prioritising projects that remain financially "
-            "resilient and limit downside risk."
+            "This is the **Worst Case scenario**, reflecting adverse economic conditions. "
+            "The allocation becomes conservative, prioritising financially resilient projects "
+            "that limit downside risk."
         )
 
     # --------- RISK–RETURN EXPLANATION ----------
     st.markdown("---")
-    st.subheader(f" Risk vs Return Interpretation – {scenario} Scenario")
+    st.subheader(f" Risk vs Return Analysis – {scenario} Scenario")
+
+    st.markdown(
+        """
+        This chart compares projects based on:
+        - **Risk:** Uncertainty in project cash flows  
+        - **Return:** Net Present Value (NPV) in ₹ Crore
+        """
+    )
 
     if scenario == "Best":
         st.markdown(
-            "Under favourable conditions, projects with higher risk may still be acceptable "
+            "In favourable conditions, projects with higher risk may still be acceptable "
             "if they offer significantly higher returns."
         )
-
     elif scenario == "Base":
         st.markdown(
-            "Under normal conditions, preference is given to projects that offer consistent returns "
-            "without taking excessive risk."
+            "Under normal conditions, preference is given to projects that deliver "
+            "consistent returns without excessive risk."
         )
-
     else:
         st.markdown(
-            "Under adverse conditions, focus shifts to capital protection. "
-            "Projects with lower risk and acceptable returns are prioritised."
+            "During adverse conditions, priority is given to projects in the **upper-left region** "
+            "(lower risk, acceptable return) to protect capital."
         )
 
-    # --------- RISK VS RETURN CHART ----------
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.scatter(df["Risk"], df["NPV"], s=100)
+    # --------- IMPROVED RISK VS RETURN GRAPH ----------
+    fig, ax = plt.subplots(figsize=(9, 6))
 
+    # Color code selected vs rejected
+    colors = df["Decision"].apply(
+        lambda x: "green" if "Selected" in x else "red"
+    )
+
+    ax.scatter(df["Risk"], df["NPV"], c=colors, s=120, alpha=0.8)
+
+    # Annotate points
     for _, row in df.iterrows():
         ax.annotate(
             row["Project_ID"],
             (row["Risk"], row["NPV"]),
             textcoords="offset points",
-            xytext=(5, 5)
+            xytext=(6, 6),
+            fontsize=10
         )
+
+    # Reference lines
+    ax.axhline(df["NPV"].median(), linestyle="--", alpha=0.4)
+    ax.axvline(df["Risk"].median(), linestyle="--", alpha=0.4)
 
     ax.set_xlabel("Risk (Cash-Flow Volatility)")
     ax.set_ylabel("Return (NPV in ₹ Crore)")
-    ax.set_title(f"Risk vs Return – {scenario} Scenario")
+    ax.set_title(f"Project Risk vs Return – {scenario} Scenario")
 
     st.pyplot(fig)
 
+    st.info(
+        """
+        **How to read this chart:**  
+        - 🟢 Green points = Funded projects  
+        - 🔴 Red points = Rejected projects  
+        - Upper-left area = Better return with lower risk  
+        - Lower-right area = Higher risk with weaker returns
+        """
+    )
+
     # --------- FINAL DECISION SUMMARY ----------
     st.markdown("---")
-    st.subheader(" Allocation Decision Summary")
+    st.subheader(" Capital Allocation Decision Summary")
 
     st.markdown(
-        f"Under the **{scenario} Scenario**, capital allocation decisions reflect the company’s "
-        "risk appetite and expected market conditions. Projects are selected or rejected based "
-        "on how well they align with financial objectives relevant to this scenario."
+        f"""
+        Under the **{scenario} Scenario**, capital allocation decisions are aligned with the
+        company’s risk appetite and expected market conditions. Projects were funded or
+        deferred based on how effectively they balance value creation, risk exposure,
+        and efficient use of limited capital.
+        """
     )
+
 
 
 
