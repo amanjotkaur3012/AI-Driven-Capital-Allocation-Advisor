@@ -1,2 +1,9 @@
-def priority_weight(priority):
-    return {"High": 1.0, "Medium": 0.8, "Low": 0.6}.get(priority, 0.7)
+import numpy as np
+
+def safe_divide(a, b):
+    """Avoid division by zero"""
+    return a / b if b != 0 else 0
+
+def format_currency(value):
+    """Format values in ₹ Crore"""
+    return f"₹ {value:,.2f} Cr"
