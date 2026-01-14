@@ -219,12 +219,63 @@ if page == " Capital Allocation":
     st.dataframe(df)
     st.success(f"Capital Used: ₹{spent} Cr | Capital Unused: ₹{100 - spent} Cr")
 
-    fig, ax = plt.subplots()
-    ax.scatter(df["Risk"], df["NPV"])
-    ax.set_xlabel("Risk")
-    ax.set_ylabel("NPV")
-    ax.set_title("Risk vs Return")
-    st.pyplot(fig)
+  # ---------------- RISK VS RETURN VISUALIZATION ----------------
+st.markdown("---")
+st.subheader("📉 Risk vs Return Analysis (Worst-Case Scenario)")
+
+st.markdown(
+    """
+    This chart compares projects based on **expected return (NPV)** and **risk (cash-flow volatility)**.
+    
+    - **X-axis (Risk):** Higher values mean more uncertainty in cash flows  
+    - **Y-axis (Return):** Higher values mean greater value creation  
+    - **Best projects:** High return with lower risk (top-left area)
+    """
+)
+
+fig, ax = plt.subplots(figsize=(8, 5))
+
+ax.scatter(df["Risk"], df["NPV"], s=100)
+
+for _, row in df.iterrows():
+    ax.annotate(
+        row["Project_ID"],
+        (row["Risk"], row["NPV"]),
+        textcoords="offset points",
+        xytext=(5,5)
+    )
+
+ax.set_xlabel("Risk (Cash-Flow Volatility)")
+ax.set_ylabel("Return (NPV in ₹ Cr)")
+ax.set_title("Project Risk vs Return – Worst Case Scenario")
+
+# Visual reference lines
+ax.axhline(df["NPV"].median(), linestyle="--", alpha=0.4)
+ax.axvline(df["Risk"].median(), linestyle="--", alpha=0.4)
+
+st.pyplot(fig)
+
+st.markdown(
+    """
+    **How to interpret this chart:**
+    - Projects in the **upper-left area** offer better returns with relatively lower risk  
+    - Projects in the **lower-right area** involve higher risk with weaker returns  
+    - In a worst-case scenario, preference is given to projects that remain resilient 
+      and continue to generate acceptable returns
+    """
+)
+
+st.info(
+    """
+    📌 **Why this matters in the Worst Case:**  
+    During adverse conditions, management should prioritise projects that continue 
+    to generate value without exposing the firm to excessive uncertainty.  
+    This visualization helps identify such projects quickly and supports 
+    risk-aware capital allocation decisions.
+    """
+)
+
+
 
 # ---------------- PAGE 4 ----------------
 if page == " Explainer Chatbot":
