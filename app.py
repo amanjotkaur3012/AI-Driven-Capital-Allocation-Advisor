@@ -36,14 +36,14 @@ wacc = st.sidebar.slider("Cost of Capital (WACC)", 0.09, 0.13, 0.11, 0.01)
 
 page = st.sidebar.radio(
     "Navigate",
-    ["1️⃣ Company Overview",
-     "2️⃣ AI Forecasting",
-     "3️⃣ Capital Allocation",
-     "4️⃣ Explainer Chatbot"]
+    [" Company Overview",
+     " AI Forecasting",
+     " Capital Allocation",
+     " Explainer Chatbot"]
 )
 
 # ---------------- OVERVIEW ----------------
-if page == "1️⃣ Company Overview":
+if page == " Company Overview":
     st.header("Company Data Overview")
 
     st.subheader("Historical Financial Data (2018–2024)")
@@ -53,7 +53,7 @@ if page == "1️⃣ Company Overview":
     st.dataframe(projects)
 
 # ---------------- FORECASTING ----------------
-if page == "2️⃣ AI Forecasting":
+if page == " AI Forecasting":
     st.header("AI Forecasting & Model Comparison")
 
     target = st.selectbox("Forecast Variable", ["Revenue", "Operating_Cost"])
@@ -69,7 +69,7 @@ if page == "2️⃣ AI Forecasting":
     st.success(f"Selected Model: **{best_name}**")
 
 # ---------------- CAPITAL ALLOCATION ----------------
-if page == "3️⃣ Capital Allocation":
+if page == " Capital Allocation":
     st.header(f"Capital Allocation – {scenario} Scenario")
 
     _, rev_model, _ = train_and_select_model(historical, "Revenue")
@@ -112,10 +112,26 @@ if page == "3️⃣ Capital Allocation":
     st.pyplot(fig)
 
 # ---------------- CHATBOT ----------------
-if page == "4️⃣ Explainer Chatbot":
+if page == " Explainer Chatbot":
     st.header("Capital Allocation Explainer")
 
-    question = st.text_input("Ask a question about the allocation decision")
-    if question:
-        response = get_chatbot_response(question, df)
-        st.info(response)
+    st.markdown(
+        """
+        This section provides predefined executive-level explanations
+        of the capital allocation decision.
+        """
+    )
+
+    if "df" not in locals():
+        st.warning("Please complete the Capital Allocation step first.")
+    else:
+        from chatbot_logic import get_predefined_answers
+
+        answers = get_predefined_answers(df)
+
+        selected_question = st.radio(
+            "Select a question to view the explanation:",
+            list(answers.keys())
+        )
+
+        st.info(answers[selected_question])
