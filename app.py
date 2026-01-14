@@ -109,7 +109,7 @@ if page == "3️⃣ Capital Allocation":
 
 # ---------------- PAGE 4 ----------------
 if page == "4️⃣ Explainer Chatbot":
-    st.markdown("## 🧠 Capital Allocation Explainer")
+    st.markdown("##  Capital Allocation Explainer")
     st.markdown(
         """
         <div style="color:#6b7280; font-size:15px;">
@@ -131,7 +131,7 @@ if page == "4️⃣ Explainer Chatbot":
         col1, col2 = st.columns([1, 2])
 
         with col1:
-            st.markdown("### 📌 Key Questions")
+            st.markdown("###  Key Questions")
             selected_q = st.radio(
                 "",
                 list(answers.keys()),
@@ -139,7 +139,7 @@ if page == "4️⃣ Explainer Chatbot":
             )
 
         with col2:
-            st.markdown("### 📊 Explanation")
+            st.markdown("###  Explanation")
             st.markdown(
                 f"""
                 <div style="
