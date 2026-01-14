@@ -1,28 +1,34 @@
 import numpy as np
 import numpy_financial as npf
+from scenario_analysis import apply_scenario
 
-WACC = 0.11
-
-def estimate_cashflows(revenue, cost, years):
+def cashflows(base_revenue, base_cost, years, scenario):
+    """
+    Generates annual project cash flows
+    using AI-forecasted revenue and costs.
+    """
     growth = 0.04
+
+    revenue, cost = apply_scenario(base_revenue, base_cost, scenario)
+
     return [
-        (revenue * (1+growth)**i) - (cost * (1+growth)**i)
+        (revenue - cost) * (1 + growth) ** i
         for i in range(1, years + 1)
     ]
 
-def npv(cashflows, investment):
-    return npf.npv(WACC, [-investment] + cashflows)
+def npv(cf, investment, wacc):
+    return npf.npv(wacc, [-investment] + cf)
 
-def irr(cashflows, investment):
-    return npf.irr([-investment] + cashflows)
+def irr(cf, investment):
+    return npf.irr([-investment] + cf)
 
-def payback(cashflows, investment):
+def payback(cf, investment):
     cumulative = 0
-    for i, cf in enumerate(cashflows):
-        cumulative += cf
+    for i, c in enumerate(cf):
+        cumulative += c
         if cumulative >= investment:
             return i + 1
     return float("inf")
 
-def risk(cashflows):
-    return np.std(cashflows) / np.mean(cashflows)
+def risk(cf):
+    return np.std(cf) / np.mean(cf)
