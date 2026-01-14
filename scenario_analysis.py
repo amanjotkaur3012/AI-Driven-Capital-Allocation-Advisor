@@ -1,6 +1,18 @@
-def scenario_adjustment(revenue, cost, scenario):
+def apply_scenario(revenue, cost, scenario):
+    """
+    Applies macroeconomic scenario shocks.
+
+    Best Case:
+    - Revenue +15%
+
+    Worst Case:
+    - Revenue -20%
+    - Cost +10%
+    """
     if scenario == "Best":
-        return revenue * 1.15, cost
+        revenue *= 1.15
     elif scenario == "Worst":
-        return revenue * 0.80, cost * 1.10
+        revenue *= 0.80
+        cost *= 1.10
+
     return revenue, cost
