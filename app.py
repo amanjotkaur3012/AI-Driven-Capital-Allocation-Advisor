@@ -181,17 +181,29 @@ if page == " AI Forecasting":
 
 
 # ---------------- PAGE 3 ----------------
+# ---------------- PAGE 3: CAPITAL ALLOCATION ----------------
 if page == " Capital Allocation":
+
     st.header(f"Capital Allocation – {scenario} Scenario")
 
+    st.markdown(
+        """
+        This section evaluates investment projects under different economic scenarios
+        and allocates capital based on risk, return, and budget constraints.
+        """
+    )
+
+    # --------- AI FORECASTING INPUTS ----------
     _, rev_model, _ = train_and_select_model(historical, "Revenue")
     _, cost_model, _ = train_and_select_model(historical, "Operating_Cost")
 
-    latest = historical[["Year", "Inflation (%)", "Demand_Index"]].iloc[[-1]]
-    forecast_revenue = rev_model.predict(latest)[0]
-    forecast_cost = cost_model.predict(latest)[0]
+    latest_inputs = historical[["Year", "Inflation (%)", "Demand_Index"]].iloc[[-1]]
+    forecast_revenue = rev_model.predict(latest_inputs)[0]
+    forecast_cost = cost_model.predict(latest_inputs)[0]
 
+    # --------- PROJECT EVALUATION ----------
     records = []
+
     for _, p in projects.iterrows():
         cf = cashflows(
             forecast_revenue,
@@ -210,70 +222,94 @@ if page == " Capital Allocation":
         })
 
     df = pd.DataFrame(records)
+
+    # --------- SCORING & ALLOCATION ----------
     df = score_projects(df)
     df, spent = allocate(df)
 
-    # STORE RESULT
+    # Save for chatbot
     st.session_state["allocation_df"] = df
 
+    # --------- RESULTS TABLE ----------
+    st.subheader(" Project Evaluation & Allocation Results")
     st.dataframe(df)
+
     st.success(f"Capital Used: ₹{spent} Cr | Capital Unused: ₹{100 - spent} Cr")
 
-  # ---------------- RISK VS RETURN VISUALIZATION ----------------
-st.markdown("---")
-st.subheader("📉 Risk vs Return Analysis (Worst-Case Scenario)")
+    # --------- SCENARIO EXPLANATION ----------
+    st.markdown("---")
+    st.subheader(" Scenario-Based Allocation Explanation")
 
-st.markdown(
-    """
-    This chart compares projects based on **expected return (NPV)** and **risk (cash-flow volatility)**.
-    
-    - **X-axis (Risk):** Higher values mean more uncertainty in cash flows  
-    - **Y-axis (Return):** Higher values mean greater value creation  
-    - **Best projects:** High return with lower risk (top-left area)
-    """
-)
+    if scenario == "Best":
+        st.info(
+            "This is the **Best Case scenario**, assuming favourable market conditions and strong growth. "
+            "In this case, the system prioritises projects with higher return potential, even if they "
+            "carry slightly higher risk, as upside opportunities outweigh downside concerns."
+        )
 
-fig, ax = plt.subplots(figsize=(8, 5))
+    elif scenario == "Base":
+        st.info(
+            "This is the **Base Case scenario**, representing normal business conditions. "
+            "Projects are selected based on a balanced trade-off between risk and return, "
+            "focusing on stable performance and efficient use of capital."
+        )
 
-ax.scatter(df["Risk"], df["NPV"], s=100)
+    else:  # Worst
+        st.info(
+            "This is the **Worst Case scenario**, reflecting adverse economic conditions and higher uncertainty. "
+            "The allocation strategy becomes conservative, prioritising projects that remain financially "
+            "resilient and limit downside risk."
+        )
 
-for _, row in df.iterrows():
-    ax.annotate(
-        row["Project_ID"],
-        (row["Risk"], row["NPV"]),
-        textcoords="offset points",
-        xytext=(5,5)
+    # --------- RISK–RETURN EXPLANATION ----------
+    st.markdown("---")
+    st.subheader(f" Risk vs Return Interpretation – {scenario} Scenario")
+
+    if scenario == "Best":
+        st.markdown(
+            "Under favourable conditions, projects with higher risk may still be acceptable "
+            "if they offer significantly higher returns."
+        )
+
+    elif scenario == "Base":
+        st.markdown(
+            "Under normal conditions, preference is given to projects that offer consistent returns "
+            "without taking excessive risk."
+        )
+
+    else:
+        st.markdown(
+            "Under adverse conditions, focus shifts to capital protection. "
+            "Projects with lower risk and acceptable returns are prioritised."
+        )
+
+    # --------- RISK VS RETURN CHART ----------
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.scatter(df["Risk"], df["NPV"], s=100)
+
+    for _, row in df.iterrows():
+        ax.annotate(
+            row["Project_ID"],
+            (row["Risk"], row["NPV"]),
+            textcoords="offset points",
+            xytext=(5, 5)
+        )
+
+    ax.set_xlabel("Risk (Cash-Flow Volatility)")
+    ax.set_ylabel("Return (NPV in ₹ Crore)")
+    ax.set_title(f"Risk vs Return – {scenario} Scenario")
+
+    st.pyplot(fig)
+
+    # --------- FINAL DECISION SUMMARY ----------
+    st.markdown("---")
+    st.subheader(" Allocation Decision Summary")
+
+    st.markdown(
+        f"Under the **{scenario} Scenario**, capital allocation decisions reflect the company’s "
+        "risk appetite and expected market conditions. Projects are selected or rejected based "
+        "on how well they align with financial objectives relevant to this scenario."
     )
-
-ax.set_xlabel("Risk (Cash-Flow Volatility)")
-ax.set_ylabel("Return (NPV in ₹ Cr)")
-ax.set_title("Project Risk vs Return – Worst Case Scenario")
-
-# Visual reference lines
-ax.axhline(df["NPV"].median(), linestyle="--", alpha=0.4)
-ax.axvline(df["Risk"].median(), linestyle="--", alpha=0.4)
-
-st.pyplot(fig)
-
-st.markdown(
-    """
-    **How to interpret this chart:**
-    - Projects in the **upper-left area** offer better returns with relatively lower risk  
-    - Projects in the **lower-right area** involve higher risk with weaker returns  
-    - In a worst-case scenario, preference is given to projects that remain resilient 
-      and continue to generate acceptable returns
-    """
-)
-
-st.info(
-    """
-    📌 **Why this matters in the Worst Case:**  
-    During adverse conditions, management should prioritise projects that continue 
-    to generate value without exposing the firm to excessive uncertainty.  
-    This visualization helps identify such projects quickly and supports 
-    risk-aware capital allocation decisions.
-    """
-)
 
 
 
