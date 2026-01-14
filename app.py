@@ -48,7 +48,7 @@ All values in ₹ Crore (INR Cr).
 # ---------------- PAGE 2 ----------------
 # ---------------- PAGE 2 ----------------
 if page == " AI Forecasting":
-    st.markdown("## 🤖 AI Forecasting")
+    st.markdown("## AI Forecasting")
     st.markdown(
         """
         This section uses machine learning models to forecast key financial variables 
@@ -60,7 +60,7 @@ if page == " AI Forecasting":
 
     # Select variable
     target = st.selectbox(
-        "📌 Forecast Variable",
+        " Forecast Variable",
         ["Revenue", "Operating_Cost"]
     )
 
@@ -111,7 +111,7 @@ if page == " AI Forecasting":
 
     # Business takeaway
     st.markdown("---")
-    st.subheader("📌 Business Takeaway")
+    st.subheader(" Business Takeaway")
     st.markdown(
         """
         The selected AI model provides a reliable estimate of future financial values. 
