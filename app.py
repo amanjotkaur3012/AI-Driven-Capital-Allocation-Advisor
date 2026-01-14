@@ -46,77 +46,136 @@ All values in ₹ Crore (INR Cr).
     st.dataframe(projects)
 
 # ---------------- PAGE 2 ----------------
-# ---------------- PAGE 2 ----------------
 if page == " AI Forecasting":
-    st.markdown("## AI Forecasting")
+    st.markdown("##  AI Forecasting")
     st.markdown(
         """
         This section uses machine learning models to forecast key financial variables 
-        based on historical company data and economic indicators.
+        using historical company data and economic indicators.
         """
     )
 
     st.markdown("---")
 
-    # Select variable
+    # Select variable to forecast
     target = st.selectbox(
         " Forecast Variable",
         ["Revenue", "Operating_Cost"]
     )
 
-    best_name, _, results = train_and_select_model(historical, target)
+    best_name, best_model, results = train_and_select_model(historical, target)
 
-    # Model comparison table
+    # ---------------- MODEL COMPARISON ----------------
+    st.subheader(" Model Performance Comparison")
+
     df_results = pd.DataFrame({
         "Model": results.keys(),
         "R² Score": [round(results[m]["R2"], 3) for m in results],
         "Mean Absolute Error (₹ Cr)": [round(results[m]["MAE"], 2) for m in results]
     })
 
-    st.subheader(" Model Performance Comparison")
     st.dataframe(df_results)
 
     st.markdown("---")
 
-    # Explain metrics
-    st.subheader(" How to read these results")
+    # ---------------- METRIC EXPLANATION ----------------
+    st.subheader(" How to read these metrics")
     st.markdown(
         """
         - **R² Score** shows how well the model explains past trends.  
           A value closer to **1** means the model fits historical data very well.  
-        - **Mean Absolute Error (MAE)** shows the average prediction error in ₹ Crore.  
-          Lower MAE means more accurate predictions.
+
+        - **Mean Absolute Error (MAE)** shows the average difference between actual 
+          and predicted values in ₹ Crore.  
+          Lower MAE means more accurate forecasts.
         """
     )
 
-    # Selected model explanation
+    # ---------------- FORECAST VS ACTUAL ----------------
+    st.markdown("---")
+    st.subheader(" Forecast vs Actual Comparison")
+
+    X = historical[["Year", "Inflation (%)", "Demand_Index"]]
+    y_actual = historical[target]
+    y_pred = best_model.predict(X)
+
+    fig, ax = plt.subplots()
+    ax.plot(historical["Year"], y_actual, label="Actual", marker="o")
+    ax.plot(historical["Year"], y_pred, label="Forecast", marker="o", linestyle="--")
+    ax.set_xlabel("Year")
+    ax.set_ylabel(f"{target} (₹ Cr)")
+    ax.set_title(f"Actual vs Forecasted {target}")
+    ax.legend()
+
+    st.pyplot(fig)
+
+    st.markdown(
+        """
+        **Interpretation:**  
+        The closer the forecasted line is to the actual values, the more reliable 
+        the model is in capturing historical trends.
+        """
+    )
+
+    # ---------------- MODEL SELECTION ----------------
     st.markdown("---")
     st.subheader(" Model Selection Decision")
 
+    st.success(f"Selected Model: **{best_name}**")
+
     if best_name == "Linear Regression":
-        explanation = (
-            "Linear Regression was selected because it explains historical trends "
-            "very accurately and produces the lowest prediction error. "
-            "It also provides stable and interpretable forecasts, making it suitable "
-            "for financial decision-making."
-        )
-    else:
-        explanation = (
-            "The selected model performed better than alternatives based on accuracy "
-            "and prediction stability."
+        st.info(
+            """
+            Linear Regression was selected because it demonstrates **very high accuracy**
+            (high R² score) and **low prediction error** (low MAE).  
+            It also provides **stable and interpretable forecasts**, which is important 
+            for financial decision-making.
+            """
         )
 
-    st.success(f"**Selected Model:** {best_name}")
-    st.info(explanation)
-
-    # Business takeaway
+    # ---------------- WHY NOT DECISION TREE ----------------
     st.markdown("---")
-    st.subheader(" Business Takeaway")
+    st.subheader(" Why Decision Tree was not selected")
+
     st.markdown(
         """
-        The selected AI model provides a reliable estimate of future financial values. 
-        These forecasts are later used to evaluate project profitability, assess risk, 
-        and support capital allocation decisions.
+        Although the Decision Tree model can capture complex patterns, it performed 
+        poorly in this case due to limited historical data.
+
+        - It showed **lower accuracy (lower R² score)**  
+        - It produced **higher prediction error (higher MAE)**  
+        - It is more prone to **overfitting**, making forecasts less stable  
+
+        For financial forecasting, **stability and consistency** are preferred over 
+        complexity.
+        """
+    )
+
+    # ---------------- CONFIDENCE EXPLANATION ----------------
+    st.markdown("---")
+    st.subheader(" Confidence in Forecasts")
+
+    st.markdown(
+        """
+        Forecast confidence is based on:
+        - Strong historical fit (high R²)
+        - Low prediction error (low MAE)
+        - Consistent trend capture over time  
+
+        While no forecast is perfect, the selected model provides a **reliable baseline**
+        for evaluating future project performance and supporting capital allocation decisions.
+        """
+    )
+
+    # ---------------- BUSINESS TAKEAWAY ----------------
+    st.markdown("---")
+    st.subheader(" Business Takeaway")
+
+    st.markdown(
+        """
+        The AI forecasting model provides dependable estimates of future financial values.
+        These forecasts are used as inputs for project evaluation, risk assessment, 
+        and capital allocation decisions in later stages of the system.
         """
     )
 
