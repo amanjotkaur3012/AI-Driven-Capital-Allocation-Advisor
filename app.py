@@ -1,67 +1,121 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from data_generation import *
 from forecasting import *
 from financial_metrics import *
 from allocation_model import *
+from chatbot_logic import get_chatbot_response
 
 st.set_page_config(layout="wide")
+
+# ---------------- TITLE ----------------
 st.title("AI-Driven Capital Allocation Advisor")
 
+st.markdown("""
+### Company Context
+
+**Company:** Apex Industries Ltd. *(Fictional)*  
+**Profile:** Diversified Indian Conglomerate  
+**Decision Maker:** CFO & Capital Allocation Committee  
+
+This AI system supports strategic capital allocation decisions.
+Final decisions remain with management.
+
+**All monetary values are in ₹ Crore (INR Cr).**
+""")
+
+# ---------------- DATA ----------------
 historical = generate_historical_data()
 projects = generate_project_data()
 
-st.sidebar.header("Navigation")
-page = st.sidebar.radio("Page", [
-    "Overview",
-    "Forecasting & Model Comparison",
-    "Capital Allocation"
-])
+# ---------------- SIDEBAR ----------------
+scenario = st.sidebar.selectbox("Scenario", ["Base", "Best", "Worst"])
+wacc = st.sidebar.slider("Cost of Capital (WACC)", 0.09, 0.13, 0.11, 0.01)
 
-if page == "Overview":
-    st.subheader("Project Overview")
-    st.write("AI-assisted capital allocation using interpretable ML models.")
+page = st.sidebar.radio(
+    "Navigate",
+    ["1️⃣ Company Overview",
+     "2️⃣ AI Forecasting",
+     "3️⃣ Capital Allocation",
+     "4️⃣ Explainer Chatbot"]
+)
+
+# ---------------- OVERVIEW ----------------
+if page == "1️⃣ Company Overview":
+    st.header("Company Data Overview")
+
+    st.subheader("Historical Financial Data (2018–2024)")
+    st.dataframe(historical)
+
+    st.subheader("Internal Investment Projects")
     st.dataframe(projects)
 
-if page == "Forecasting & Model Comparison":
-    st.subheader("ML Model Comparison")
+# ---------------- FORECASTING ----------------
+if page == "2️⃣ AI Forecasting":
+    st.header("AI Forecasting & Model Comparison")
 
-    target = st.selectbox("Forecast Target", ["Revenue", "Operating_Cost"])
-    results = train_models(historical, target)
+    target = st.selectbox("Forecast Variable", ["Revenue", "Operating_Cost"])
+    best_name, _, results = train_and_select_model(historical, target)
 
-    model_choice = st.radio(
-        "Choose Model for Forecasting",
-        list(results.keys())
-    )
+    comparison = pd.DataFrame({
+        "Model": results.keys(),
+        "R² Score": [results[m]["R2"] for m in results],
+        "MAE (₹ Cr)": [results[m]["MAE"] for m in results]
+    })
 
-    st.write("### Model Performance")
-    st.metric("R² Score", round(results[model_choice]["r2"], 3))
-    st.metric("MAE", round(results[model_choice]["mae"], 2))
+    st.dataframe(comparison)
+    st.success(f"Selected Model: **{best_name}**")
 
-    st.info(
-        "Linear Regression offers higher transparency, while Decision Tree "
-        "captures non-linear patterns with controlled complexity."
-    )
+# ---------------- CAPITAL ALLOCATION ----------------
+if page == "3️⃣ Capital Allocation":
+    st.header(f"Capital Allocation – {scenario} Scenario")
 
-if page == "Capital Allocation":
-    st.subheader("Capital Allocation Results")
+    _, rev_model, _ = train_and_select_model(historical, "Revenue")
+    _, cost_model, _ = train_and_select_model(historical, "Operating_Cost")
+
+    latest_inputs = historical[["Year", "Inflation (%)", "Demand_Index"]].iloc[[-1]]
+    forecast_revenue = rev_model.predict(latest_inputs)[0]
+    forecast_cost = cost_model.predict(latest_inputs)[0]
 
     records = []
     for _, p in projects.iterrows():
-        cashflows = estimate_cashflows(50, 30, p["Project_Life"])
+        cf = cashflows(
+            forecast_revenue,
+            forecast_cost,
+            p["Project_Life (Years)"],
+            scenario
+        )
 
         records.append({
             "Project_ID": p["Project_ID"],
-            "Initial_Investment": p["Initial_Investment"],
-            "NPV": npv(cashflows, p["Initial_Investment"]),
-            "IRR": irr(cashflows, p["Initial_Investment"]),
-            "Payback": payback(cashflows, p["Initial_Investment"]),
-            "Risk": risk(cashflows)
+            "Investment": p["Initial_Investment (₹ Cr)"],
+            "NPV": npv(cf, p["Initial_Investment (₹ Cr)"], wacc),
+            "IRR": irr(cf, p["Initial_Investment (₹ Cr)"]),
+            "Payback": payback(cf, p["Initial_Investment (₹ Cr)"]),
+            "Risk": risk(cf)
         })
 
     df = pd.DataFrame(records)
     df = score_projects(df)
-    df = allocate_budget(df)
+    df, spent = allocate(df)
 
     st.dataframe(df)
+    st.success(f"Capital Used: ₹{spent} Cr | Capital Unused: ₹{100 - spent} Cr")
+
+    fig, ax = plt.subplots()
+    ax.scatter(df["Risk"], df["NPV"])
+    ax.set_xlabel("Risk")
+    ax.set_ylabel("NPV (₹ Cr)")
+    ax.set_title("Risk–Return Trade-off")
+    st.pyplot(fig)
+
+# ---------------- CHATBOT ----------------
+if page == "4️⃣ Explainer Chatbot":
+    st.header("Capital Allocation Explainer")
+
+    question = st.text_input("Ask a question about the allocation decision")
+    if question:
+        response = get_chatbot_response(question, df)
+        st.info(response)
