@@ -100,6 +100,8 @@ if page == " Capital Allocation":
     df = pd.DataFrame(records)
     df = score_projects(df)
     df, spent = allocate(df)
+    
+    st.session_state["allocation_df"] = df
 
     st.dataframe(df)
     st.success(f"Capital Used: ₹{spent} Cr | Capital Unused: ₹{100 - spent} Cr")
