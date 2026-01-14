@@ -109,13 +109,62 @@ if page == "3️⃣ Capital Allocation":
 
 # ---------------- PAGE 4 ----------------
 if page == "4️⃣ Explainer Chatbot":
-    st.header("Capital Allocation Explainer")
+    st.markdown("## 🧠 Capital Allocation Explainer")
+    st.markdown(
+        """
+        <div style="color:#6b7280; font-size:15px;">
+        Executive-level insights explaining how and why capital allocation decisions were made.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
 
     if "allocation_df" not in st.session_state:
-        st.warning("Please run Capital Allocation first.")
+        st.warning("⚠️ Please run the Capital Allocation step first.")
     else:
         df = st.session_state["allocation_df"]
         answers = get_predefined_answers(df)
 
-        q = st.radio("Select a question", list(answers.keys()))
-        st.info(answers[q])
+        # Layout: Left = questions | Right = answer
+        col1, col2 = st.columns([1, 2])
+
+        with col1:
+            st.markdown("### 📌 Key Questions")
+            selected_q = st.radio(
+                "",
+                list(answers.keys()),
+                label_visibility="collapsed"
+            )
+
+        with col2:
+            st.markdown("### 📊 Explanation")
+            st.markdown(
+                f"""
+                <div style="
+                    background-color:#f8fafc;
+                    padding:20px;
+                    border-radius:10px;
+                    border-left:5px solid #2563eb;
+                    font-size:16px;
+                    line-height:1.6;
+                ">
+                {answers[selected_q]}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown("---")
+
+        st.markdown(
+            """
+            <div style="font-size:13px; color:#6b7280;">
+            📌 Note: This system provides decision support based on financial analysis. 
+            Final investment decisions remain with management.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
