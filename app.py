@@ -181,7 +181,7 @@ if page == " AI Forecasting":
 
 
 # ---------------- PAGE 3: CAPITAL ALLOCATION ----------------
-if page == "3️⃣ Capital Allocation":
+if page == " Capital Allocation":
 
     st.header(f"Capital Allocation – {scenario} Scenario")
 
