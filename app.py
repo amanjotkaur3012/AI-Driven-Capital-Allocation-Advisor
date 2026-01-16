@@ -15,7 +15,7 @@ st.set_page_config(layout="wide")
 page = st.sidebar.radio(
     "Navigate",
     [" Company Overview",
-     " AI Forecasting",
+     " Forecasting",
      " Capital Allocation",
      " Explainer Chatbot"]
 )
@@ -46,7 +46,7 @@ All values in ₹ Crore (INR Cr).
     st.dataframe(projects)
 
 # ---------------- PAGE 2 ----------------
-if page == " AI Forecasting":
+if page == " Forecasting":
     st.markdown("##  AI Forecasting")
     st.markdown(
         """
